@@ -1,0 +1,6 @@
+PORT=8880
+
+LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token
+LINE_CHANNEL_SECRET=your_channel_secret
+
+ENDPOINT_URL=your_copilot_api_endpoint
