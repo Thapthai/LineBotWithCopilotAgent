@@ -27,6 +27,45 @@ async function startConversation(token) {
   return data.conversationId;
 }
 
+async function isTokenValid(token) {
+  try {
+    const response = await fetch(
+      `${process.env.ENDPOINT_URL}/v3/directline/tokens/verify`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.ok;
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    return false;
+  }
+}
+
+async function isConversationIdValid(conversationId) {
+  try {
+    const response = await fetch(
+      `${process.env.ENDPOINT_URL}/v3/directline/conversations/${conversationId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // หากคืนค่า 200 แสดงว่าการสนทนายังมีอยู่
+    return response.ok;
+  } catch (error) {
+    console.error("Error verifying conversation ID:", error);
+    return false;
+  }
+}
+
 async function sendMessage(token, conversationId, inputMessage) {
   const response = await fetch(
     `https://directline.botframework.com/v3/directline/conversations/${conversationId}/activities`,
@@ -55,12 +94,14 @@ async function getBotResponse(token, conversationId, watermark = null) {
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`, // Insert Authorization Header with Bearer Token
+        Authorization: `Bearer ${token}`,
       },
     }
   );
 
   const data = await response.json();
+
+  // console.log("bot Response", data);
 
   // Filter activities that are waiting for user input
   const acceptingInputActivities = data.activities.filter(
@@ -118,4 +159,6 @@ module.exports = {
   checkForBotMessages,
   getBotResponse,
   checkBotResponse,
+  isTokenValid,
+  isConversationIdValid,
 };

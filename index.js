@@ -9,6 +9,8 @@ const {
   startConversation,
   sendMessage,
   checkForBotMessages,
+  isTokenValid,
+  isConversationIdValid,
 } = require("./controllers/copilotGetInput.controller");
 
 const app = express();
@@ -26,7 +28,6 @@ app.post("/webhook", async (req, res) => {
   const events = req.body.events;
 
   try {
-    // Receive messages from users and send them to Copilot.
     await Promise.all(
       events.map(async (event) => {
         if (event.type !== "message" || event.message.type !== "text") {
@@ -34,24 +35,43 @@ app.post("/webhook", async (req, res) => {
         }
 
         const userInput = event.message.text;
-        console.log("Received user input:", userInput);
+        const userId = event.source.userId; // รับ userId
 
-        // Use Direct Line API to get tokens
-        const tokenData = await getDirectLineToken(process.env.ENDPOINT_URL);
-        const token = tokenData.token;
-        const conversationId = await startConversation(token);
+        let session = await getUserSession(userId); // ดึง session จากฐานข้อมูล
 
-        // Send a message from a user to Copilot
-        await sendMessage(token, conversationId, userInput);
+        if (!session || !(await isTokenValid(session.token))) {
+          console.log("Token expired or session not found, refreshing...");
+          const tokenData = await getDirectLineToken(process.env.ENDPOINT_URL);
+          session = {
+            userId,
+            token: tokenData.token,
+            conversationId: tokenData.conversationId,
+          };
+          await updateUserSession(userId, session);
+        }
 
-        // Check the response from Copilot
-        const botResponses = await checkForBotMessages(token, conversationId);
+        // ตรวจสอบ conversation ID ว่าใช้งานได้
+        if (
+          !(await isConversationIdValid(session.conversationId, session.token))
+        ) {
+          console.log("Conversation ID expired, starting new conversation...");
+          session.conversationId = await startConversation(session.token);
+          await updateUserSession(userId, session);
+        }
 
-        // Send messages received from Copilot to LINE users.
+        await sendMessage(session.token, session.conversationId, userInput);
+
+        const botResponses = await checkForBotMessages(
+          session.token,
+          session.conversationId
+        );
+
         if (botResponses && botResponses.length > 0) {
           const replyText = botResponses[0];
           const echo = { type: "text", text: replyText };
           await client.replyMessage(event.replyToken, echo);
+          session.botResponse = replyText;
+          await updateUserSession(userId, session); // อัปเดต session กับคำตอบของ Bot
         } else {
           const echo = {
             type: "text",
