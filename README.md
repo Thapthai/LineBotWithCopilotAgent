@@ -44,6 +44,17 @@
 
    The server will start running at `http://localhost:3000` or the port you have configured.
 
+4. **Run ngrok**:
+   If you want to expose your local server to the internet (for example, to connect your Line bot to your local server), use ngrok. Ngrok will provide a public URL that you can use to interact with external services.
+
+   **Follow these steps to set up ngrok:**
+
+   **Download and install ngrok**
+   Once installed, run ngrok with the following command to expose your local server:
+
+   ```bash
+   ngrok http 3000
+   ```
 ### List of Dependencies
 
 - `@line/bot-sdk`: Used for connecting with the Line Messaging API
@@ -116,6 +127,17 @@ If you encounter any issues or have suggestions, please open an issue in the rep
 
    เซิร์ฟเวอร์จะเริ่มทำงานที่ `http://localhost:3000` หรือ port ที่ได้กำหนด.
 
+4. **รัน ngrok**:
+   หากคุณต้องการเปิดเผยเซิร์ฟเวอร์ภายในเครื่องของคุณให้เข้าถึงได้จากอินเทอร์เน็ต (เช่น การเชื่อมต่อ Line bot ของคุณกับเซิร์ฟเวอร์ภายในเครื่อง) คุณสามารถใช้ ngrok ได้ โดย ngrok จะให้ URL สาธารณะที่คุณสามารถใช้ในการเชื่อมต่อกับบริการภายนอก
+
+   **ขั้นตอนเหล่านี้เพื่อตั้งค่า ngrok:**
+
+   **ดาวน์โหลดและติดตั้ง ngrok**
+   หลังจากติดตั้ง ngrok แล้ว ให้รันคำสั่งต่อไปนี้เพื่อเปิดเผยเซิร์ฟเวอร์ภายในเครื่องของคุณ:
+
+   ```bash
+   ngrok http 3000
+   ```
 
 ### รายการ dependencies
 
